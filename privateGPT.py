@@ -76,7 +76,7 @@ def main():
 
         # Print the relevant sources used for the answer
         for i, document in enumerate(docs):
-            print(f"\n[{i}]>" + document.metadata["source"])
+            print(f"[{i}]>" + document.metadata["source"])
             if args.full_sources:
                 print(document.page_content)
 
