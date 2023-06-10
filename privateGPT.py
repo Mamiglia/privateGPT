@@ -75,9 +75,10 @@ def main():
         print(answer)
 
         # Print the relevant sources used for the answer
-        for document in docs:
-            print("\n> " + document.metadata["source"] + ":")
-            print(document.page_content)
+        for i, document in enumerate(docs):
+            print(f"\n[{i}]>" + document.metadata["source"])
+            if args.full_sources:
+                print(document.page_content)
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description='privateGPT: Ask questions to your documents without an internet connection, '
@@ -88,6 +89,10 @@ def parse_arguments():
     parser.add_argument("--mute-stream", "-M",
                         action='store_true',
                         help='Use this flag to disable the streaming StdOut callback for LLMs.')
+
+    parser.add_argument('--full-sources', '-F',
+                        action='store_true',
+                        help='Use this flag to show the full text of every source instead of citing just the name')
 
     return parser.parse_args()
 
