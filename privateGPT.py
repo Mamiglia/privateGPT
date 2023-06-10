@@ -8,6 +8,18 @@ from langchain.llms import GPT4All, LlamaCpp
 import os
 import argparse
 
+
+from langchain.prompts import PromptTemplate
+prompt_template = """Use the following pieces of context to answer the question at the end. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+
+{context}
+
+Question: {question}
+Answer very carefully reasoning step by step in order to not get the answer wrong:"""
+PROMPT = PromptTemplate(
+    template=prompt_template, input_variables=["context", "question"]
+)
+
 load_dotenv()
 
 embeddings_model_name = os.environ.get("EMBEDDINGS_MODEL_NAME")
@@ -32,7 +44,6 @@ def main():
     # Prepare the LLM
     match model_type:
         case "LlamaCpp":
-            llm = LlamaCpp(model_path=model_path, n_ctx=model_n_ctx, callbacks=callbacks, verbose=False)
             llm = LlamaCpp(model_path=model_path, n_ctx=model_n_ctx, callbacks=callbacks, verbose=True, n_gpu_layers=n_gpu_layers)
             # llm = LlamaCpp(model_path=model_path, n_ctx=model_n_ctx, callbacks=callbacks, verbose=False)
         case "GPT4All":
@@ -40,7 +51,13 @@ def main():
         case _default:
             print(f"Model {model_type} not supported!")
             exit;
-    qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever, return_source_documents= not args.hide_source)
+    qa = RetrievalQA.from_chain_type(
+      llm=llm, 
+      chain_type="stuff", 
+      retriever=retriever, 
+      return_source_documents= not args.hide_source,
+      chain_type_kwargs={"prompt": PROMPT}
+      )
     # Interactive questions and answers
     while True:
         query = input("\nEnter a query: ")
